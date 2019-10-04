@@ -23,20 +23,20 @@ def box_id(lines):
                             break
 
                 if diff == 1:
-                    # we found the words, now its just about convenient printing
-                    print(word1, word2)
+                    # we found the words, now its just about convenient #printing
+                    #print(word1, word2)
 
                     for i, letter in enumerate(word1):
                         
                         if letter == word2[i]:
-                            print(letter, end='')
+                            #print(letter, end='')
                     break
 
 
 def main():
     lines = parse_input()
     box_id(lines)
-    print()
+    #print()
 
 
 if __name__ == "__main__":

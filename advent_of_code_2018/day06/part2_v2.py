@@ -37,7 +37,7 @@ def neighbors(point):
 
 
 def populate_neighbors(point, grid, coords, count):
-    print(sum(count))
+    #print(sum(count))
     possible_n = neighbors(point)
 
     for n in possible_n:
@@ -71,7 +71,7 @@ def within_bounds(point, coords):
 
 def main():
     coords = parse_input()
-    print(count_points(coords))
+    #print(count_points(coords))
 
 
 if __name__ == "__main__":

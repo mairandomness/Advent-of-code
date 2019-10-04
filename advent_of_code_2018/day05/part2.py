@@ -35,13 +35,13 @@ def main():
     polymer = loop(polymer)
     new_polys = []
     lens = []
-    print(analyze(polymer))
+    #print(analyze(polymer))
     for unit in analyze(polymer):
         new_polys.append(polymer.replace(unit, '').replace(unit.upper(),''))
     for poly in new_polys:
         lens.append(len(loop(poly)))
     
-    print(min(lens))
+    #print(min(lens))
 
 
 if __name__ == "__main__":

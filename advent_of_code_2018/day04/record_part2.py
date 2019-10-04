@@ -1,5 +1,5 @@
 from datetime import datetime
-from pprint import pprint
+from p#print import p#print
 
 min = 41
 def take_first(elem):
@@ -59,7 +59,7 @@ def sleepy_time(schedule_data):
 
     guard_list.sort(key=take_second, reverse=True)
     sample = [(line[0], line[1], line[3]) for line in guard_list]
-    pprint(sample)
+    p#print(sample)
     return guard_list[0]
 
 
@@ -69,7 +69,7 @@ def main():
     id = guard[0]
     sleepy_minutes = guard[3]
 
-    print(id*sleepy_minutes)
+    #print(id*sleepy_minutes)
 
 
 if __name__ == "__main__":

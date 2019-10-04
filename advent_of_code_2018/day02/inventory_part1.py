@@ -24,7 +24,7 @@ def checksum(lines):
 
 def main():
     lines = parse_input()
-    print(checksum(lines))
+    #print(checksum(lines))
 
 
 if __name__ == "__main__":

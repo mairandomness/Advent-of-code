@@ -7,7 +7,7 @@ def parse_input():
     
 def main():
     numbers = parse_input()
-    print(sum(numbers))
+    #print(sum(numbers))
 
 if __name__ == "__main__":
     main()

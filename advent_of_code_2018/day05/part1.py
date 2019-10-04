@@ -29,8 +29,8 @@ def main():
     polymer = parse_input()
     #polymer = "abBA"
     new_poly = loop(polymer)
-    print(new_poly)
-    print(len(new_poly))
+    #print(new_poly)
+    #print(len(new_poly))
 
 
 if __name__ == "__main__":

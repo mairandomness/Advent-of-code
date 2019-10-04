@@ -24,14 +24,14 @@ def count_claims(fabric, claims):
         for item in line:
             if item > 1:
                 count += 1
-    #print('\n'.join(['\t'.join([str(cell) for cell in row[:10]]) for row in fabric[:10]]))
+    ##print('\n'.join(['\t'.join([str(cell) for cell in row[:10]]) for row in fabric[:10]]))
     return count
 
 
 def main():
     fabric = [[0] * 1000 for n in range(1000)]
     claims = parse_input()
-    print(count_claims(fabric, claims))
+    #print(count_claims(fabric, claims))
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ def distance(point_A, point_B):
 
 def main():
     coords = parse_input()
-    print(count_points(coords))
+    #print(count_points(coords))
 
 
 if __name__ == "__main__":

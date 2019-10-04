@@ -28,16 +28,16 @@ def count_claims(fabric, claims):
                 if not ((line1_start > line2_end or line2_start > line1_end) or (row1_start > row2_end or row2_start > row1_end)):
                     ids.discard(id1 + 1)
                     ids.discard(id2 +1)
-                    # print("pair")
-                    # print(claim1)
-                    # print(claim2)
+                    # #print("pair")
+                    # #print(claim1)
+                    # #print(claim2)
 
     return ids
 
 
 def main():
     claims = parse_input()
-    print(count_claims(fabric, claims))
+    #print(count_claims(fabric, claims))
 
 
 if __name__ == "__main__":

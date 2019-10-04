@@ -19,7 +19,7 @@ def main():
             cur_freq += number
             # if we saw this freq before, we are done
             if (cur_freq in freqs):
-                print(cur_freq)
+                #print(cur_freq)
                 not_found = False
                 break
 
