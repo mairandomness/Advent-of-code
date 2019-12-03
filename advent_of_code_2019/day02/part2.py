@@ -4,6 +4,7 @@ def parse_input():
         lines = text.split(",")
     return [int(line) for line in lines]
 
+
 def test_result(numbers):
     numbers_copy = numbers[:]
     for numbers[1] in range(100):
@@ -20,20 +21,24 @@ def test_result(numbers):
                     break
 
                 elif numbers[i] == 1:
-                    numbers[numbers[i+3]] = numbers[numbers[i+1]] + numbers[numbers[i+2]]
+                    numbers[numbers[i+3]] = numbers[numbers[i+1]] + \
+                        numbers[numbers[i+2]]
                     i += 4
 
                 elif numbers[i] == 2:
-                    numbers[numbers[i+3]] = numbers[numbers[i+1]] * numbers[numbers[i+2]]
+                    numbers[numbers[i+3]] = numbers[numbers[i+1]] * \
+                        numbers[numbers[i+2]]
                     i += 4
+
             if numbers[0] == 19690720:
-                return 100 * noun + verb 
-    
+                return 100 * noun + verb
+
 
 def main():
     numbers = parse_input()
-    
+
     print(test_result(numbers))
+
 
 if __name__ == "__main__":
     main()

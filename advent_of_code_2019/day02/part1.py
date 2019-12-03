@@ -4,6 +4,7 @@ def parse_input():
         lines = text.split(",")
     return [int(line) for line in lines]
 
+
 def run_code(numbers):
     numbers[1] = 12
     numbers[2] = 2
@@ -14,20 +15,24 @@ def run_code(numbers):
             break
 
         elif numbers[i] == 1:
-            numbers[numbers[i+3]] = numbers[numbers[i+1]] + numbers[numbers[i+2]]
+            numbers[numbers[i+3]] = numbers[numbers[i+1]] + \
+                numbers[numbers[i+2]]
             i += 4
 
         elif numbers[i] == 2:
-            numbers[numbers[i+3]] = numbers[numbers[i+1]] * numbers[numbers[i+2]]
+            numbers[numbers[i+3]] = numbers[numbers[i+1]] * \
+                numbers[numbers[i+2]]
             i += 4
         if i == 4:
             print(numbers)
     return numbers[0]
 
+
 def main():
     numbers = parse_input()
-    
+
     print(run_code(numbers))
+
 
 if __name__ == "__main__":
     main()
