@@ -1,5 +1,6 @@
-# Did some refactoring to reuse this code on day 9
-# It was kinda unsustainable
+# after much suffering, I think its time to refactor this a bit
+# I never expected this code to be reused so much...
+# and it's now.. just...bad...
 
 import itertools
 
@@ -11,12 +12,12 @@ def parse_input(input):
     return [line for line in lines]
 
 
-def get_parameters(numbers, i):
+def get_parameters(numbers, i, base):
     # print("numbers[i], i",numbers[i], i)
     if numbers[i] == '99':
         return []
 
-    elif numbers[i][-1:] == '3' or numbers[i][-1:] == '4':
+    elif numbers[i][-1:] == '3' or numbers[i][-1:] == '4' or numbers[i][-1:] == '9':
         n_params = 1
 
     elif numbers[i][-1:] == '5' or numbers[i][-1:] == '6':
@@ -41,7 +42,12 @@ def get_parameters(numbers, i):
     # print("modes:", mode)
 
     for j in range(n_params):
-        if mode[j] == 1 or j == 2 or numbers[i] == '3' or numbers[i] == '4':
+        if mode[j] == 2 and (j == 2 or numbers[i][-1:] == '3' or numbers[i][-1:] == '4'):
+            parameters[j] = int(numbers[i+j+1]) + base
+        elif mode[j] == 2:
+            address = int(numbers[i+j+1]) + base
+            parameters[j] = int(numbers[address])
+        elif mode[j] == 1 or j == 2 or numbers[i][-1:] == '3' or numbers[i][-1:] == '4':
             parameters[j] = int(numbers[i+j+1])
         else:
             address = int(numbers[i+j+1])
@@ -52,28 +58,40 @@ def get_parameters(numbers, i):
     return parameters
 
 
-def run_intcode(numbers_original, phase, input):
+def run_intcode(numbers_original, input):
     numbers = numbers_original[:]
+    base = 0
     i = 0
     output = 0
 
-    inputees = [str(phase), str(input)]
+    # max_num = int(max(numbers, key=lambda x: len(x)))
+    max_num = 999999
+    if len(numbers) < max_num:
+        numbers = numbers + (max_num - len(numbers)) * ['0']
+    print("len numbers", len(numbers))
+
+    inputees = [str(input)]
     while True:
+
 
         if numbers[i] == "99":
             return output
 
-        parameters = get_parameters(numbers, i)
+        parameters = get_parameters(numbers, i, base)
 
-        if numbers[i] == '3':
-            numbers[int(numbers[i+1])] = inputees[0]
+        if numbers[i][-1:] == '3':
+            numbers[parameters[0]] = inputees[0]
             # print("puts input {} at position {} so numbers[{}] = {}".format(
             #      inputees[0], parameters[0], parameters[0], numbers[parameters[0]]))
             inputees.pop(0)
 
-        elif numbers[i][-1] == '4':
+        elif numbers[i][-1:] == '4':
             output = numbers[parameters[0]]
-            # print(output)
+            print(output)
+
+        elif numbers[i][-1:] == '9':
+            base += parameters[0]
+            # print("Add value {} to base, resulting in {}".format(parameters[0], base))
 
         elif numbers[i][-1:] == '5':
             if parameters[0] != 0:
@@ -110,37 +128,14 @@ def run_intcode(numbers_original, phase, input):
     return output
 
 
-def run_amplifiers(numbers, phase_setting):
-    input = 0
-    for i in range(5):
-        input = run_intcode(numbers, phase_setting[i], input)
-        print("finished run", i)
-        print("output of this run", input)
-    return input
-
-
-def run_all_amplifiers(numbers):
-    phase_settings = itertools.permutations('01234', 5)
-    phase_settings = [list(phase_setting) for phase_setting in phase_settings]
-    to_truster = []
-    print(len(phase_settings))
-    for phase_setting in phase_settings:
-        phase_setting = [int(phase) for phase in phase_setting]
-        to_truster.append(int(run_amplifiers(numbers, phase_setting)))
-    return to_truster
-
-
 def main():
+    # input = 1
     # numbers = parse_input("test1")
-    # print(run_amplifiers(numbers, [4,3,2,1,0]))
-    # 43210
+    # run_intcode(numbers, input)
 
-    #numbers = parse_input("test2")
-    #print(run_amplifiers(numbers, [0,1,2,3,4]))
-    # 54321
-
+    input = 1
     numbers = parse_input("input")
-    print(max(run_all_amplifiers(numbers)))
+    run_intcode(numbers, input)
 
 
 if __name__ == "__main__":

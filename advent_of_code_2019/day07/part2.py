@@ -1,3 +1,4 @@
+# decided to play around with generators
 import itertools
 
 
