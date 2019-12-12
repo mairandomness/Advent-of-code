@@ -1,8 +1,8 @@
+# after much suffering, I think its time to refactor this a bit
+# I never expected this code to be reused so much...
+# and it's now.. just...bad...
 
-class Robot:
-    def __init__(self, position, direction):
-        self.position = position
-        self.direction = direction
+import itertools
 
 
 def parse_input(input):
@@ -58,7 +58,8 @@ def get_parameters(numbers, i, base):
     return parameters
 
 
-def run_intcode(numbers, input):
+def run_intcode(numbers_original, input):
+    numbers = numbers_original[:]
     base = 0
     i = 0
     output = 0
@@ -69,23 +70,24 @@ def run_intcode(numbers, input):
         numbers = numbers + (max_num - len(numbers)) * ['0']
     print("len numbers", len(numbers))
 
+    inputees = [str(i) for i in input]
     while True:
 
+
         if numbers[i] == "99":
-            print("PLZSTAP")
-            yield "STOP"
+            return output
 
         parameters = get_parameters(numbers, i, base)
 
         if numbers[i][-1:] == '3':
-            numbers[parameters[0]] = input[0]
+            numbers[parameters[0]] = inputees[0]
             # print("puts input {} at position {} so numbers[{}] = {}".format(
-            #      input[0], parameters[0], parameters[0], numbers[parameters[0]]))
-            input.pop(0)
+            #      inputees[0], parameters[0], parameters[0], numbers[parameters[0]]))
+            inputees.pop(0)
 
         elif numbers[i][-1:] == '4':
             output = numbers[parameters[0]]
-            yield int(output)
+            print(output)
 
         elif numbers[i][-1:] == '9':
             base += parameters[0]
@@ -123,103 +125,17 @@ def run_intcode(numbers, input):
 
         i += len(parameters) + 1
 
-
-def robot_run(map, numbers):
-    painted = []
-    input = []
-    x = len(map)/2
-    robot = Robot((x, x), 0)
-    generator = run_intcode(numbers, input)
-
-    while True:
-        # for i in range(10):
-        if len(painted) % 100 == 0:
-            print(len(painted))
-
-        (x, y) = robot.position
-        # black 0, white 1
-        input.append(str(map[x][y]))
-
-        color_list = ["black", "white"]
-        direction_list = ["up", "right", "down", "left"]
-        print("Robot is at position {}, facing {}, the tile is {}".format(
-            robot.position, direction_list[robot.direction], color_list[int(input[0])]))
-
-        color = next(generator)
-        if color == "STOP":
-            return painted
-
-        direction = next(generator)
-        if direction == "STOP":
-            return painted
-
-        if color != 1 and color != 0:
-            input.append(str(map[x][y]))
-            color = next(generator)
-            if color == "STOP":
-                return painted
-            direction = next(generator)
-            if direction == "STOP":
-                return painted
-        
-        print("color: {}, direction: {}".format(color, direction))
-
-        # PAINT
-
-        map[x][y] = color
-        painted.append((x, y))
-
-        print("Robot is painting it {}, the map tile is now {}".format(
-            color_list[color], color_list[map[x][y]]))
-
-        direc_inst = ["turn left", "turn right"]
-        print(direc_inst[direction])
-
-        # GET DIRECTION
-        # up right down left
-        #  0   1    2    3
-
-        if direction == 0:
-            robot.direction += -1
-        elif direction == 1:
-            robot.direction += 1
-
-        # MOVE
-        # up (on the matrix its y-1)
-        if robot.direction == 4 or robot.direction == 0:
-            robot.direction = 0
-            robot.position = (x, y - 1)
-        # right
-        elif robot.direction == 1:
-            robot.position = (x + 1, y)
-        # down
-        elif robot.direction == 2:
-            robot.position = (x, y + 1)
-        # left
-        elif robot.direction == -1 or robot.direction == 3:
-            robot.direction = 3
-            robot.position = (x - 1, y)
-
-        print("The new direction is {}, the new position is {}".format(
-            direction_list[robot.direction], robot.position))
-
-
-def creat_map(n):
-    line = [0]*n
-    map = [line[:] for i in range(n)]
-    return map
+    return output
 
 
 def main():
-    # instrutions = parse_input("test")
-    # map = creat_map(10)
-    # painted = robot_run(map, instrutions)
-    # print(len(set(painted)))
+    # input = 1
+    # numbers = parse_input("test1")
+    # run_intcode(numbers, input)
 
+    input = [0,0]
     numbers = parse_input("input")
-    map = creat_map(200)
-    painted = robot_run(map, numbers)
-    print(len(set(painted)))
+    run_intcode(numbers, input)
 
 
 if __name__ == "__main__":
