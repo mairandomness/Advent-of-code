@@ -86,8 +86,11 @@ def run_intcode(numbers_original, input):
             inputees.pop(0)
 
         elif numbers[i][-1:] == '4':
-            output = numbers[parameters[0]]
-            print(output)
+            if numbers[i] == "104":
+                output = parameters[0]
+            else:
+                output = numbers[parameters[0]]
+            print("OTPUT:", output)
 
         elif numbers[i][-1:] == '9':
             base += parameters[0]

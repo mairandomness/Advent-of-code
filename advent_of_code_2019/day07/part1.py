@@ -71,9 +71,12 @@ def run_intcode(numbers_original, phase, input):
             #      inputees[0], parameters[0], parameters[0], numbers[parameters[0]]))
             inputees.pop(0)
 
-        elif numbers[i][-1] == '4':
-            output = numbers[parameters[0]]
-            # print(output)
+        elif numbers[i][-1:] == '4':
+            if numbers[i] == "104":
+                output = parameters[0]
+            else:
+                output = numbers[parameters[0]]
+            print("OTPUT:", output)
 
         elif numbers[i][-1:] == '5':
             if parameters[0] != 0:

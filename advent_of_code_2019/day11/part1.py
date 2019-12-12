@@ -84,7 +84,10 @@ def run_intcode(numbers, input):
             input.pop(0)
 
         elif numbers[i][-1:] == '4':
-            output = numbers[parameters[0]]
+            if numbers[i] == "104":
+                output = parameters[0]
+            else:
+                output = numbers[parameters[0]]
             yield int(output)
 
         elif numbers[i][-1:] == '9':
@@ -127,12 +130,12 @@ def run_intcode(numbers, input):
 def robot_run(map, numbers):
     painted = []
     input = []
-    x = len(map)/2
+    x = int(len(map)/2)
     robot = Robot((x, x), 0)
+
     generator = run_intcode(numbers, input)
 
     while True:
-        # for i in range(10):
         if len(painted) % 100 == 0:
             print(len(painted))
 
@@ -153,15 +156,6 @@ def robot_run(map, numbers):
         if direction == "STOP":
             return painted
 
-        if color != 1 and color != 0:
-            input.append(str(map[x][y]))
-            color = next(generator)
-            if color == "STOP":
-                return painted
-            direction = next(generator)
-            if direction == "STOP":
-                return painted
-        
         print("color: {}, direction: {}".format(color, direction))
 
         # PAINT
@@ -217,7 +211,7 @@ def main():
     # print(len(set(painted)))
 
     numbers = parse_input("input")
-    map = creat_map(200)
+    map = creat_map(80)
     painted = robot_run(map, numbers)
     print(len(set(painted)))
 
