@@ -1,22 +1,27 @@
-#created class game state, have to refactor the rest
+# created class game state, have to refactor the rest
 import curses
 import itertools
 import copy
 
+
 class Game_state:
-    def __init__(self, numbers, game_map):
+    def __init__(self, numbers, game_map, i):
         self.numbers = numbers
+        self.numbers_i = i
         self.game_map = game_map
         self.saved_map = copy.deepcopy(game_map)
         self.saved_numbers = numbers[:]
-    
+        self.saved_numbers_i = i
+
     def save(self):
-        self.saved_map = copy.deepcopy(game_map)
-        self.saved_numbers = numbers[:]
-    
+        self.saved_map = copy.deepcopy(self.game_map)
+        self.saved_numbers = self.numbers[:]
+        self.saved_numbers_i = self.numbers_i
+
     def load(self):
-        self.game_map = copy.deepcopy(saved_map)
-        self.numbers = saved_numbers[:]
+        self.game_map = copy.deepcopy(self.saved_map)
+        self.numbers = self.saved_numbers[:]
+        self.numbers_i = self.saved_numbers_i
 
 
 def parse_inputi(inputi):
@@ -27,7 +32,7 @@ def parse_inputi(inputi):
 
 
 def get_parameters(numbers, i, base):
-    # print("numbers[i], i",numbers[i], i)
+    # print("game.numbers[i], i",game.numbers[i], i)
     if numbers[i] == '99':
         return []
 
@@ -39,8 +44,8 @@ def get_parameters(numbers, i, base):
 
     elif numbers[i][-1:] == '1' or numbers[i][-1:] == '2' or numbers[i][-1:] == '7' or numbers[i][-1:] == '8':
         n_params = 3
-    # print(numbers[i][-1:])
-    # print("instructions:", numbers[i : i + n_params + 1])
+    # print(game.numbers[i][-1:])
+    # print("instructions:", game.numbers[i : i + n_params + 1])
 
     parameters = [0] * n_params
 
@@ -72,21 +77,19 @@ def get_parameters(numbers, i, base):
     return parameters
 
 
-def decode_key(c, stdscr, numbers, game_map, saved_map, saved_numbers):
+def decode_key(c, stdscr, game):
     if c == 's':
-        saved_numbers = numbers[:]
-        saved_map = copy.deepcopy(game_map)
+        game.savednumbers = game.numbers[:]
+        game.saved_map = copy.deepcopy(game.game_map)
         c = stdscr.getkey()
-        (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
-            c, stdscr, numbers, game_map, saved_map, saved_numbers)
+        (c, game) = decode_key(c, stdscr, game)
 
     if c == 'l':
         # LOAD
-        numbers = saved_numbers[:]
-        game_map = copy.deepcopy(saved_map)
+        game.numbers = game.saved_numbers[:]
+        game.game_map = copy.deepcopy(game.saved_map)
         c = stdscr.getkey()
-        (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
-            c, stdscr, numbers, game_map, saved_map, saved_numbers)
+        (c, game) = decode_key(c, stdscr, game)
 
     if c == 'KEY_LEFT':
         c = '-1'
@@ -96,103 +99,94 @@ def decode_key(c, stdscr, numbers, game_map, saved_map, saved_numbers):
         c = '0'
     else:
         c = stdscr.getkey()
-        (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
-            c, stdscr, numbers, game_map, saved_map, saved_numbers)
-    return (c, numbers, game_map, saved_map, saved_numbers)
+        (c, game) = decode_key(c, stdscr, game)
+    return (c, game)
 
 
-def run_intcode(numbers, stdscr, game_map, saved_numbers, saved_map):
+def run_intcode(game, stdscr):
     base = 0
-    i = 0
+    i = game.numbers_i
     output = 0
 
-    # max_num = int(max(numbers, key=lambda x: len(x)))
+    # max_num = int(max(game.numbers, key=lambda x: len(x)))
     max_num = 999999
-    if len(numbers) < max_num:
-        numbers = numbers + (max_num - len(numbers)) * ['0']
-    print("len numbers", len(numbers))
+    if len(game.numbers) < max_num:
+        game.numbers = game.numbers + (max_num - len(game.numbers)) * ['0']
+    print("len game.numbers", len(game.numbers))
 
     while True:
 
-        if numbers[i] == "99":
-            c = stdscr.getkey()
-            (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
-                c, stdscr, numbers, game_map, saved_map, saved_numbers)
-
-            while numbers[i] == "99":
-                # LOAD
-                c = stdscr.getkey()
-                (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
-                    c, stdscr, numbers, game_map, saved_map, saved_numbers)
-
+        if game.numbers[i] == "99":
             yield "STOP"
 
-        parameters = get_parameters(numbers, i, base)
+        parameters = get_parameters(game.numbers, i, base)
 
-        if numbers[i][-1:] == '3':
+        if game.numbers[i][-1:] == '3':
             c = stdscr.getkey()
-            (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
-                c, stdscr, numbers, game_map, saved_map, saved_numbers)
+            (c, game) = decode_key(c, stdscr, game)
+            i = game.numbers_i
+            parameters = get_parameters(game.numbers, i, base)
 
-            numbers[parameters[0]] = c
-            # print("puts inputi {} at position {} so numbers[{}] = {}".format(
-            #      inputiees[0], parameters[0], parameters[0], numbers[parameters[0]]))
+            game.numbers[parameters[0]] = c
+            # print("puts inputi {} at position {} so game.numbers[{}] = {}".format(
+            #      inputiees[0], parameters[0], parameters[0], game.numbers[parameters[0]]))
 
-        elif numbers[i][-1:] == '4':
-            if numbers[i] == "104":
+        elif game.numbers[i][-1:] == '4':
+            if game.numbers[i] == "104":
                 output = parameters[0]
             else:
-                output = numbers[parameters[0]]
+                output = game.numbers[parameters[0]]
             yield int(output)
             # print("OTPUT:", output)
 
-        elif numbers[i][-1:] == '9':
+        elif game.numbers[i][-1:] == '9':
             base += parameters[0]
             # print("Add value {} to base, resulting in {}".format(parameters[0], base))
 
-        elif numbers[i][-1:] == '5':
+        elif game.numbers[i][-1:] == '5':
             if parameters[0] != 0:
                 i = parameters[1] - 3
 
-        elif numbers[i][-1:] == '6':
+        elif game.numbers[i][-1:] == '6':
             if parameters[0] == 0:
                 i = parameters[1] - 3
 
-        elif numbers[i][-1:] == '1':
-            numbers[parameters[2]] = str(parameters[0] + parameters[1])
-            # print("puts {} + {} at position {} so numbers_cp[{}] = {}".format(
-            #                 parameters[0], parameters[1], parameters[2], parameters[2], numbers[parameters[2]]))
+        elif game.numbers[i][-1:] == '1':
+            game.numbers[parameters[2]] = str(parameters[0] + parameters[1])
+            # print("puts {} + {} at position {} so game.numbers_cp[{}] = {}".format(
+            #                 parameters[0], parameters[1], parameters[2], parameters[2], game.numbers[parameters[2]]))
 
-        elif numbers[i][-1:] == '2':
-            numbers[parameters[2]] = str(parameters[0] * parameters[1])
-            # print("puts {} * {} at position {} so numbers_cp[{}] = {}".format(
-            #     parameters[0], parameters[1], parameters[2], parameters[2], numbers[parameters[2]]))
+        elif game.numbers[i][-1:] == '2':
+            game.numbers[parameters[2]] = str(parameters[0] * parameters[1])
+            # print("puts {} * {} at position {} so game.numbers_cp[{}] = {}".format(
+            #     parameters[0], parameters[1], parameters[2], parameters[2], game.numbers[parameters[2]]))
 
-        elif numbers[i][-1:] == '7':
+        elif game.numbers[i][-1:] == '7':
             if parameters[0] < parameters[1]:
-                numbers[parameters[2]] = '1'
+                game.numbers[parameters[2]] = '1'
             else:
-                numbers[parameters[2]] = '0'
+                game.numbers[parameters[2]] = '0'
 
-        elif numbers[i][-1:] == '8':
+        elif game.numbers[i][-1:] == '8':
             if parameters[0] == parameters[1]:
-                numbers[parameters[2]] = '1'
+                game.numbers[parameters[2]] = '1'
             else:
-                numbers[parameters[2]] = '0'
+                game.numbers[parameters[2]] = '0'
 
         i += len(parameters) + 1
+        game.numbers_i = i
 
 
-def run_game(numbers, game_map, stdscr):
-    numbers[0] = '2'
-    generator = run_intcode(numbers, stdscr, game_map, saved_numbers, saved_map)
+def run_game(game, stdscr):
+    game.numbers[0] = '2'
+    generator = run_intcode(game, stdscr)
     args = [0, 0, 0]
     n_blocks = 1
     n = 0
 
     while True:
 
-        print_map(stdscr, game_map)
+        print_map(stdscr, game.game_map)
 
         for i in range(3):
             args[i] = next(generator)
@@ -205,7 +199,7 @@ def run_game(numbers, game_map, stdscr):
 
         if x == -1 and y == 0:
             player_score = tile_id
-            n_blocks = count_blocks(game_map)
+            n_blocks = count_blocks(game.game_map)
             if n_blocks == 0 and n > 5000:
                 curses.nocbreak()
                 stdscr.keypad(False)
@@ -215,7 +209,7 @@ def run_game(numbers, game_map, stdscr):
                 break
 
         else:
-            game_map[y][x] = tile_id
+            game.game_map[y][x] = tile_id
 
             stdscr.clear()
         n += 1
@@ -275,7 +269,7 @@ def main():
 
     game_map = create_map(44)
     numbers = parse_inputi("input")
-    game = Game_state(numbers, game_map)
+    game = Game_state(numbers, game_map, 0)
     print(run_game(game, stdscr))
 
 
