@@ -1,8 +1,22 @@
-# after much suffering, I think its time to refactor this a bit
-# I never expected this code to be reused so much...
-# and it's now.. just...bad...
+#created class game state, have to refactor the rest
 import curses
 import itertools
+import copy
+
+class Game_state:
+    def __init__(self, numbers, game_map):
+        self.numbers = numbers
+        self.game_map = game_map
+        self.saved_map = copy.deepcopy(game_map)
+        self.saved_numbers = numbers[:]
+    
+    def save(self):
+        self.saved_map = copy.deepcopy(game_map)
+        self.saved_numbers = numbers[:]
+    
+    def load(self):
+        self.game_map = copy.deepcopy(saved_map)
+        self.numbers = saved_numbers[:]
 
 
 def parse_inputi(inputi):
@@ -58,8 +72,36 @@ def get_parameters(numbers, i, base):
     return parameters
 
 
-def run_intcode(numbers_original, stdscr):
-    numbers = numbers_original[:]
+def decode_key(c, stdscr, numbers, game_map, saved_map, saved_numbers):
+    if c == 's':
+        saved_numbers = numbers[:]
+        saved_map = copy.deepcopy(game_map)
+        c = stdscr.getkey()
+        (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
+            c, stdscr, numbers, game_map, saved_map, saved_numbers)
+
+    if c == 'l':
+        # LOAD
+        numbers = saved_numbers[:]
+        game_map = copy.deepcopy(saved_map)
+        c = stdscr.getkey()
+        (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
+            c, stdscr, numbers, game_map, saved_map, saved_numbers)
+
+    if c == 'KEY_LEFT':
+        c = '-1'
+    elif c == 'KEY_RIGHT':
+        c = '1'
+    elif c == 'KEY_UP' or c == 'KEY_DOWN':
+        c = '0'
+    else:
+        c = stdscr.getkey()
+        (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
+            c, stdscr, numbers, game_map, saved_map, saved_numbers)
+    return (c, numbers, game_map, saved_map, saved_numbers)
+
+
+def run_intcode(numbers, stdscr, game_map, saved_numbers, saved_map):
     base = 0
     i = 0
     output = 0
@@ -73,19 +115,25 @@ def run_intcode(numbers_original, stdscr):
     while True:
 
         if numbers[i] == "99":
-            print("STAAWP")
+            c = stdscr.getkey()
+            (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
+                c, stdscr, numbers, game_map, saved_map, saved_numbers)
+
+            while numbers[i] == "99":
+                # LOAD
+                c = stdscr.getkey()
+                (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
+                    c, stdscr, numbers, game_map, saved_map, saved_numbers)
+
             yield "STOP"
 
         parameters = get_parameters(numbers, i, base)
 
         if numbers[i][-1:] == '3':
             c = stdscr.getkey()
-            if c == 'KEY_LEFT':
-                c = '-1'
-            elif c == 'KEY_RIGHT':
-                c = '1'
-            elif c == 'KEY_UP' or c == 'KEY_DOWN':
-                c = '0'
+            (c, numbers, game_map, saved_map, saved_numbers) = decode_key(
+                c, stdscr, numbers, game_map, saved_map, saved_numbers)
+
             numbers[parameters[0]] = c
             # print("puts inputi {} at position {} so numbers[{}] = {}".format(
             #      inputiees[0], parameters[0], parameters[0], numbers[parameters[0]]))
@@ -137,7 +185,7 @@ def run_intcode(numbers_original, stdscr):
 
 def run_game(numbers, game_map, stdscr):
     numbers[0] = '2'
-    generator = run_intcode(numbers, stdscr)
+    generator = run_intcode(numbers, stdscr, game_map, saved_numbers, saved_map)
     args = [0, 0, 0]
     n_blocks = 1
     n = 0
@@ -185,19 +233,28 @@ def count_blocks(game_map):
 
 
 def print_map(stdscr, game_map):
-    for y in range(80):
-        for x in range(80):
+    next = 0
+    previous = 0
+    for y in range(25):
+        for x in range(44):
+            # if x != 43:
+            #     next = game_map[y][x+1]
+            # if x != 0:
+            #     previous = game_map[y][x-1]
+
             char = game_map[y][x]
-            if char == 0:
-                display_char = " "
-            if char == 1:
+
+            if char == 3 or next == 3 or previous == 3:
+                display_char = "T"
+                next = 0
+            elif char == 0:
+                display_char = "."
+            elif char == 1:
                 display_char = "W"
-            if char == 2:
+            elif char == 2:
                 display_char = "▓"
-            if char == 3:
-                display_char = "_"
-            if char == 4:
-                display_char = "_"
+            elif char == 4:
+                display_char = "o"
 
             stdscr.addch(y, x, display_char)
     stdscr.refresh()
@@ -216,9 +273,10 @@ def main():
     curses.cbreak()
     stdscr.keypad(True)
 
-    game_map = create_map(80)
+    game_map = create_map(44)
     numbers = parse_inputi("input")
-    print(run_game(numbers, game_map, stdscr))
+    game = Game_state(numbers, game_map)
+    print(run_game(game, stdscr))
 
 
 if __name__ == "__main__":
