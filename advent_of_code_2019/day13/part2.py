@@ -8,10 +8,12 @@ class Game_state:
     def __init__(self, numbers, game_map, i):
         self.numbers = numbers
         self.numbers_i = i
+        # self.numbers_params = []
         self.game_map = game_map
         self.saved_map = copy.deepcopy(game_map)
         self.saved_numbers = numbers[:]
         self.saved_numbers_i = i
+        # self.saved_numbers_params = []
 
     def save(self):
         self.saved_map = copy.deepcopy(self.game_map)
@@ -79,8 +81,10 @@ def get_parameters(numbers, i, base):
 
 def decode_key(c, stdscr, game):
     if c == 's':
-        game.savednumbers = game.numbers[:]
+        game.saved_numbers = game.numbers[:]
         game.saved_map = copy.deepcopy(game.game_map)
+        game.saved_numbers_i = game.numbers_i
+        # game.saved_numbers_params = game.numbers_params
         c = stdscr.getkey()
         (c, game) = decode_key(c, stdscr, game)
 
@@ -88,6 +92,8 @@ def decode_key(c, stdscr, game):
         # LOAD
         game.numbers = game.saved_numbers[:]
         game.game_map = copy.deepcopy(game.saved_map)
+        game.saved_numbers_i = game.numbers_i
+        # game.saved_numbers_params = game.numbers_params
         c = stdscr.getkey()
         (c, game) = decode_key(c, stdscr, game)
 
@@ -117,7 +123,12 @@ def run_intcode(game, stdscr):
     while True:
 
         if game.numbers[i] == "99":
-            yield "STOP"
+            while game.numbers[i] == "99":
+                c = stdscr.getkey()
+                (c, game) = decode_key(c, stdscr, game)
+                i = game.numbers_i
+                parameters = get_parameters(game.numbers, i, base)
+        
 
         parameters = get_parameters(game.numbers, i, base)
 
@@ -220,8 +231,8 @@ def run_game(game, stdscr):
 def count_blocks(game_map):
     n = 0
     for i in range(len(game_map)):
-        for i in range(len(game_map)):
-            if game_map == 2:
+        for j in range(len(game_map[0])):
+            if game_map[i][j] == 2:
                 n += 1
     return n
 
