@@ -20,10 +20,13 @@ def load_map():
     temp_map = []
     with open("maze", "r") as f:
         for line in f:
-            currentline = list(line[0:-1])
+            currentline = line[1:-2].split(", ")
             for i, char in enumerate(currentline):
+                char = char[1:-1]
                 if char == ':' or char == ";":
                     currentline[i] = '.'
+                else:
+                    currentline[i] = char
             temp_map.append(currentline)
 
     return temp_map
@@ -120,10 +123,17 @@ def decide_where_next(game):
     if '=' in p_neighboring_tiles and (y, x) != (py, px):
         n = opposite_directions.index(game.droid_direction)
     elif '=' not in neighboring_tiles and '.' in neighboring_tiles:
-        n = neighboring_tiles.index('.')
-    elif '=' not in neighboring_tiles and '.' not in neighboring_tiles and ':' in neighboring_tiles:
+        # n = neighboring_tiles.index('.')
         for i, tile in enumerate(neighboring_tiles):
-            n = neighboring_tiles.index(':')
+            if tile == '.':
+                indexes.append(i)
+        n = random.choice(indexes)
+    elif '=' not in neighboring_tiles and '.' not in neighboring_tiles and ':' in neighboring_tiles:  
+        # n = neighboring_tiles.index(':')
+        for i, tile in enumerate(neighboring_tiles):
+            if tile == ':':
+                indexes.append(i)
+        n = random.choice(indexes)
     elif '=' not in neighboring_tiles and ':' not in neighboring_tiles:
         for i, tile in enumerate(neighboring_tiles):
             if tile == ';':
@@ -227,11 +237,11 @@ def print_map(stdscr, game):
     return None
 
 
-def count_undiscovered_tiles(game_map):
+def count_tiles(game_map, tile):
     count = 0
     for y in range(5, 44):
         for x in range(5, 44):
-            if game_map[y][x] == '=':
+            if game_map[y][x] == tile:
                 count += 1
     return count
 
@@ -252,7 +262,7 @@ def find_whole_map(game, stdscr):
     initial_pos = (initial_pos, initial_pos)
 
     print_map(stdscr, game)
-    while count_undiscovered_tiles(game.game_map) > 0:
+    while count_tiles(game.game_map, '=') > 1:
 
         (y, x) = game.droid_position
         stdscr.addch(y, x, ' ')
@@ -284,39 +294,39 @@ def find_whole_map(game, stdscr):
             game.droid_position = (ny, nx)
 
         elif response == 2:
-            brick = 'O'
+            game.game_map[ny][nx] = 'O'
             game.droid_position = (ny, nx)
             found_hole = True
 
-            stdscr.addch(y, x, game.game_map[y][x])
-            stdscr.addch(ny, nx, ' ')
-            stdscr.addch(ny, nx, game.game_map[ny][nx])
-            (dy, dx) = game.droid_position
-            stdscr.addch(dy, dx, ' ')
-            stdscr.addch(dy, dx, 'D')
-            stdscr.refresh()
+        stdscr.addch(y, x, game.game_map[y][x])
+        stdscr.addch(ny, nx, ' ')
+        stdscr.addch(ny, nx, game.game_map[ny][nx])
+        (dy, dx) = game.droid_position
+        stdscr.addch(dy, dx, ' ')
+        stdscr.addch(dy, dx, 'D')
+        stdscr.refresh()
 
-            (py, px) = game.previous_droid_position
+        (py, px) = game.previous_droid_position
 
-            p_neighboring_coords = [(py-1, px), (py+1, px),
-                                    (py, px-1), (py, px + 1)]
-            p_neighboring_tiles = [game.game_map[a][b]
-                                   for (a, b) in p_neighboring_coords]
-            if '=' not in p_neighboring_tiles:
-                game.previous_droid_position = game.droid_position
+        p_neighboring_coords = [(py-1, px), (py+1, px),
+                                (py, px-1), (py, px + 1)]
+        p_neighboring_tiles = [game.game_map[a][b]
+                                for (a, b) in p_neighboring_coords]
+        if '=' not in p_neighboring_tiles:
+            game.previous_droid_position = game.droid_position
 
-        # if found_hole:
-        #     save_map(game)
-        #     print("found hole after")
-        #     for line in game.game_map:
-        #         for tile in line:
-        #             if tile == ".":
-        #                 counter += 1
-        #     print(counter)
-        #     break
+        if found_hole:
+            save_map(game)
+            # print("found hole after")
+            # for line in game.game_map:
+            #     for tile in line:
+            #         if tile == ".":
+            #             counter += 1
+            # print(counter)
+            # break
 
         n += 1
-
+    save_map(game)
     return counter
 
 
@@ -325,18 +335,35 @@ def create_map(n):
     game_map = [line[:] for i in range(n)]
     return game_map
 
+def oxygenate(game_map):
+    count = 0
+    
+    while count_tiles(game_map, '.') > 0:
+        to_change = []
+        for y, line in enumerate(game_map):
+            for x, tile in enumerate(line):
+                if tile == '.':
+                    neighboring_coords = [(y-1, x), (y+1, x), (y, x-1), (y, x + 1)]
+                    neighboring_tiles = [game_map[a][b] for (a, b) in neighboring_coords]
+                    if 'O' in neighboring_tiles:
+                        to_change.append((y,x))
+        for (a,b) in to_change:
+            game_map[a][b] = 'O'
+        count += 1
+    return count
 
 def main():
-    stdscr = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    stdscr.keypad(True)
+    # stdscr = curses.initscr()
+    # curses.noecho()
+    # curses.cbreak()
+    # stdscr.keypad(True)
 
-    #game_map = load_map()
-    game_map = create_map(50)
-    numbers = parse_input("input")
-    game = Game_state(numbers, game_map, 0)
-    print(find_whole_map(game, stdscr))
+    game_map = load_map()
+    # game_map = create_map(50)
+    # numbers = parse_input("input")
+    # game = Game_state(numbers, game_map, 0)
+    # print(find_whole_map(game, stdscr))
+    print(oxygenate(game_map))
 
 
 if __name__ == "__main__":

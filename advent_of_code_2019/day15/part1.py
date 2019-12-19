@@ -125,7 +125,6 @@ def run_intcode(game, stdscr):
         game.numbers = game.numbers + (max_num - len(game.numbers)) * ['0']
 
     while True:
-        print_map(stdscr, game)
         if game.numbers[i] == "99":
             print("STAAAP")
             yield "STOP"
@@ -133,7 +132,7 @@ def run_intcode(game, stdscr):
         parameters = get_parameters(game.numbers, i, base)
 
         if game.numbers[i][-1:] == '3':
-            print("press something")
+            # print("press something")
             # c = stdscr.getkey()
             # (c, game) = decode_key(c, stdscr, game)
             (c, game) = decide_where_next(game)
@@ -209,9 +208,10 @@ def run_game(game, stdscr):
     found_hole = False
     initial_pos = int(len(game.game_map)/2)
     initial_pos = (initial_pos, initial_pos)
+    print_map(stdscr, game)
 
     while True:
-        print_map(stdscr, game)
+
         (y, x) = game.droid_position
 
         directions = ['N', 'S', 'W', 'E']
@@ -238,9 +238,17 @@ def run_game(game, stdscr):
             game.droid_position = (ny, nx)
 
         elif response == 2:
-            brick = 'O'
+            game.game_map[ny][nx] = 'O'
             game.droid_position = (ny, nx)
             found_hole = True
+
+        stdscr.addch(y, x, game.game_map[y][x])
+        stdscr.addch(ny, nx, ' ')
+        stdscr.addch(ny, nx, game.game_map[ny][nx])
+        (dy, dx) = game.droid_position
+        stdscr.addch(dy, dx, ' ')
+        stdscr.addch(dy, dx, 'D')
+        stdscr.refresh()
 
         if found_hole:
             print("found hole after")
@@ -251,7 +259,6 @@ def run_game(game, stdscr):
             print(counter)
             break
 
-        stdscr.clear()
         n += 1
 
     return counter
@@ -269,7 +276,7 @@ def main():
     curses.cbreak()
     stdscr.keypad(True)
 
-    game_map = create_map(100)
+    game_map = create_map(50)
     numbers = parse_input("input")
     game = Game_state(numbers, game_map, 0)
     print(run_game(game, stdscr))
