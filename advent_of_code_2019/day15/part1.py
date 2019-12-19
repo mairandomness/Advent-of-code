@@ -13,8 +13,6 @@ class Game_state:
         self.game_map = game_map
         self.droid_position = (initial, initial)
         self.droid_direction = 'N'
-        self.last_effective_move = 'KEY_UP'
-        self.game_map[initial][initial] = 'X'
 
 
 def parse_input(inputi):
@@ -89,6 +87,32 @@ def decode_key(c, stdscr, game):
     return (c, game)
 
 
+def decide_where_next(game):
+    (y, x) = game.droid_position
+    indexes = []
+    instructions = ['1', '2', '3', '4']
+    directions = ['N', 'S', 'W', 'E']
+    neighboring_coords = [(y-1, x), (y+1, x), (y, x-1), (y, x + 1)]
+    neighboring_tiles = [game.game_map[a][b] for (a, b) in neighboring_coords]
+    # print(neighboring_tiles)
+    if '=' not in neighboring_tiles and '.' in neighboring_tiles:
+        n = neighboring_tiles.index('.')
+    elif '=' not in neighboring_tiles and '.' not in neighboring_tiles:
+        for i, tile in enumerate(neighboring_tiles):
+            if tile == ':':
+                indexes.append(i)
+        n = random.choice(indexes)
+
+    else:
+        for i, tile in enumerate(neighboring_tiles):
+            if tile == '=':
+                indexes.append(i)
+        n = random.choice(indexes)
+    c = instructions[n]
+    game.droid_direction = directions[n]
+    return (c, game)
+
+
 def run_intcode(game, stdscr):
 
     base = 0
@@ -110,12 +134,10 @@ def run_intcode(game, stdscr):
 
         if game.numbers[i][-1:] == '3':
             print("press something")
-            c = stdscr.getkey()
-            #c = random.choice(["KEY_UP", "KEY_DOWN", "KEY_RIGHT", "KEY_LEFT"])
-            (c, game) = decode_key(c, stdscr, game)
+            # c = stdscr.getkey()
+            # (c, game) = decode_key(c, stdscr, game)
+            (c, game) = decide_where_next(game)
             game.numbers[parameters[0]] = c
-            # print("puts inputi {} at position {} so game.numbers[{}] = {}".format(
-            #      inputiees[0], parameters[0], parameters[0], game.numbers[parameters[0]]))
 
         elif game.numbers[i][-1:] == '4':
             if game.numbers[i] == "104":
@@ -165,10 +187,14 @@ def run_intcode(game, stdscr):
 
 def print_map(stdscr, game):
     stdscr.clear()
+    initial_pos = int(len(game.game_map)/2)
+
     for y in range(len(game.game_map)):
         for x in range(len(game.game_map[0])):
             if (y, x) == game.droid_position:
                 stdscr.addch(y, x, 'D')
+            elif (y, x) == (initial_pos, initial_pos):
+                stdscr.addch(y, x, 'X')
             else:
                 stdscr.addch(y, x, game.game_map[y][x])
     stdscr.refresh()
@@ -188,49 +214,40 @@ def run_game(game, stdscr):
         print_map(stdscr, game)
         (y, x) = game.droid_position
 
+        directions = ['N', 'S', 'W', 'E']
+        neighboring_coords = [(y-1, x), (y+1, x), (y, x-1), (y, x + 1)]
+
         response = next(generator)
+
+        (ny, nx) = neighboring_coords[directions.index(
+            game.droid_direction)]
+
         if response == "STOP":
             break
-        
+
         elif response == 0:
-            brick = 'W'
-            droid_moves = 0
-        
+            game.game_map[ny][nx] = 'W'
+
         elif response == 1:
-            brick = '.'
-            droid_moves = 1
-            
+            if game.game_map[ny][nx] == '=':
+                game.game_map[ny][nx] = '.'
+
+            elif game.game_map[ny][nx] == '.':
+                game.game_map[ny][nx] = ":"
+
+            game.droid_position = (ny, nx)
+
         elif response == 2:
             brick = 'O'
-            droid_moves = 1
+            game.droid_position = (ny, nx)
             found_hole = True
 
-        if game.droid_direction == 'N':
-            if game.game_map[y-1][x] == "=":
-                counter += droid_moves
-            game.game_map[y-1][x] = brick
-            print(brick)
-            game.droid_position = (y - droid_moves, x)
-        if game.droid_direction == 'S':
-            if game.game_map[y+1][x] == "=":
-                counter += droid_moves
-            game.game_map[y+1][x] = brick
-            game.droid_position = (y + droid_moves, x)
-        if game.droid_direction == 'W':
-            if game.game_map[y][x-1] == "=":
-                counter += droid_moves
-            game.game_map[y][x-1] = brick
-            game.droid_position = (y, x - droid_moves)
-        if game.droid_direction == 'E':
-            if game.game_map[y][x+1] == "=":
-                counter += droid_moves
-            game.game_map[y][x+1] = brick
-            game.droid_position = (y, x + droid_moves)
-        
-        if game.droid_direction == initial_pos:
-            counter = 0
         if found_hole:
             print("found hole after")
+            for line in game.game_map:
+                for tile in line:
+                    if tile == ".":
+                        counter += 1
             print(counter)
             break
 
