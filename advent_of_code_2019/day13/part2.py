@@ -222,7 +222,6 @@ def run_game(game, stdscr):
         else:
             game.game_map[y][x] = tile_id
 
-            stdscr.clear()
         n += 1
 
     return n_blocks
@@ -240,6 +239,7 @@ def count_blocks(game_map):
 def print_map(stdscr, game_map):
     next = 0
     previous = 0
+    stdscr.clear()
     for y in range(25):
         for x in range(44):
             # if x != 43:
@@ -249,7 +249,7 @@ def print_map(stdscr, game_map):
 
             char = game_map[y][x]
 
-            if char == 3 or next == 3 or previous == 3:
+            if char == 3:
                 display_char = "T"
                 next = 0
             elif char == 0:
