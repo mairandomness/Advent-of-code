@@ -18,13 +18,11 @@ def find_trio(numbers, pairs):
 
     for number in numbers:
         for pair in pairs:
-            if number < pair[0]:
-                if number + sum(pair) == 2020:
-                    print("First number:", number)
-                    print("Second number:", pair[0])
-                    print("Third number:", pair[1])
-                    print("Product:", number * pair[0] * pair[1])
-                    print()
+            if number < pair[0] and number + sum(pair) == 2020:
+                print("First number:", number)
+                print("Second number:", pair[0])
+                print("Third number:", pair[1])
+                print("Product:", number * pair[0] * pair[1])
 
 
 if __name__ == "__main__":
