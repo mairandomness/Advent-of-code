@@ -42,7 +42,6 @@ def get_diff3(numbers):
 
 if __name__ == "__main__":
     numbers = parse_input()
-    numbers.sort()
     possib = possib_dict(numbers)
     diff3 = get_diff3(numbers)
 
