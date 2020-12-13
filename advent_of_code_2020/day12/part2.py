@@ -8,8 +8,6 @@ def parse_input():
 
 
 def navigate(directions):
-    cardinals = ["N", "E", "S", "W"]
-    facing = "E"
     ns = 0
     we = 0
     w_ns = 1
