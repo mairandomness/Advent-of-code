@@ -39,7 +39,7 @@ def gimme_the_sum(directions):
 
     for key, value in directions:
         # for each new masked key, we check how many new keys it adds to our mem
-        # and we increment the value accordingly
+        # and we increment the acc accordingly
         n_new_keys = number_of_new_keys(visited, key)
         visited.append(key)
         acc += value * n_new_keys
