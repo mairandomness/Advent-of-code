@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import pprint
-
 
 def parse_input():
     with open("input", "r") as f:
@@ -22,7 +20,7 @@ def solve(expressions):
                 done = False
                 new_line = []
                 i = 0
-                while i  < len(line):
+                while i < len(line):
                     if i == 0 and isinstance(line[i], int) and isinstance(line[i+2], int):
                         new_line.append(calculate(line[i:i+3]))
                         i += 3
