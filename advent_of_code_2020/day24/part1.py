@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 def parse_input():
     with open("input", "r") as f:
         text = f.read()

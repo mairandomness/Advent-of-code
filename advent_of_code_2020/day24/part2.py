@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+
 def parse_input():
     with open("input", "r") as f:
         text = f.read()
@@ -94,7 +97,7 @@ def conway(map):
         neighbors = sum(1 for i in [map.get(k, True)
                                     for k in neighbors] if not i)
 
-        if  neighbors == 2:
+        if neighbors == 2:
             new_map[curr] = False
 
     return new_map
