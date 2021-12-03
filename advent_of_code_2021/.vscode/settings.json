@@ -1,5 +1,6 @@
 {
     "python.linting.pycodestyleEnabled": true,
     "python.linting.pylintEnabled": true,
-    "python.formatting.autopep8Args": []
+    "python.formatting.autopep8Args": [],
+    "python.linting.enabled": true
 }
