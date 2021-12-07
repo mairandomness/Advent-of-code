@@ -26,16 +26,17 @@ def mark_line_on_board(line, board):
             curr_x -= 1
         else:
             curr_x += 1
-    
+
     while curr_y != y:
         board[curr_y][curr_x] += 1
         if curr_y > y:
             curr_y -= 1
         else:
             curr_y += 1
-    
+
     board[y][x] += 1
     return board
+
 
 def check_lines(lines):
     lines = filter_lines(lines)
